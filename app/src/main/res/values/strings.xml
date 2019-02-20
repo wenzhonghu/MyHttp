@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">MyHttpDemo</string>
+
+    <string name="err_data_request_tip">请求数据发生异常，请稍后重试</string>
+    <string name="err_loading_tip">网络异常，请稍后重试</string>
+    <string name="err_loading_retry_tip">加载失败，请重试</string>
+    <string name="err_loading_retry_tip2">提交失败，请重试</string>
+    <string name="err_loading_retry_tip3">网络异常，请重新提交</string>
+    <string name="err_loading_retry_tip4">网络异常，请稍后重试</string>
+    <string name="err_loading_retry_tip5">网络异常，请重新操作</string>
+    <string name="token_invalid_tip">您的用户信息失效，请重新登录</string>
+    <string name="err_net_tip">无网络，请检查网络设置</string>
+    <string name="err_data_null">获取数据失败</string>
+
+</resources>
