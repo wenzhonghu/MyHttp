@@ -30,34 +30,18 @@ V1.0.0
 #### 三、基础功能
 1. 添加依赖和配置
 ``` gradle
-android {
-    defaultConfig {
-	...
-	    javaCompileOptions {
-                    annotationProcessorOptions {
-                        arguments = [moduleName: '填写自己的模块名称', libPackageName: project.readPackage()]
-                    }
-        }
-    }
-}
 
 dependencies {
     // 替换成最新版本, 需要注意的是api
-    // 要与compiler匹配使用，均使用最新版可以保证兼容
-    compile 'com.xiaoniu.corelib:xnrouter:1.0.0'
-    annotationProcessor 'com.xiaoniu.corelib:xnprocessor:1.0.0'
-    compile 'com.xiaoniu.corelib:xnannotation:1.0.0'
+    compile 'com.xiaoniu.corelib:myhttp:1.0.0'
     ...
-
-    //注意:如果模块仅仅是使用路由访问其他模块则只需要配置
-    compile 'com.xiaoniu.corelib:xnrouter:1.0.0'
 }
 ```
 2. 添加混淆规则(如果使用了Proguard)
 ``` gradle
--keep interface * implements com.xiaoniu.finance.router.core.XnAbstractTrack
+暂无
 ```
-3. 添加注解
+3. 初始化使用
 ``` java
 // 在支持路由的页面上添加注解(必选)
 // 这里的路径需要注意的是保障其全局唯一，一般可以通过 ""/模块/功能path""
