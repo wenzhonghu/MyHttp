@@ -28,7 +28,7 @@ V1.0.0
 1. 中小企业网络访问层
 
 #### 三、基础功能
-1. 添加依赖和配置
+1. **添加依赖和配置**
 ``` gradle
 
 dependencies {
@@ -37,57 +37,105 @@ dependencies {
     ...
 }
 ```
-2. 添加混淆规则(如果使用了Proguard)
+2. **添加混淆规则(如果使用了Proguard)**
 ``` gradle
 暂无
 ```
-3. 初始化使用
+3. **初始化使用**
+在程序启动加载myhttp进行初始化工作
 ``` java
-// 在支持路由的页面上添加注解(必选)
-// 这里的路径需要注意的是保障其全局唯一，一般可以通过 ""/模块/功能path""
-@Router(value = "/fixed/cross")
-public class FixedCrossCatTracker extends XnAbstractTrack {
-    @Override
-    public  XnRouterResult fire(Context context, Bundle requestData) {
-        ...
+Builder builder = new Builder(this, Constants.BASE_URL)
+                .enableStatistic(true)
+                .appTrustCaStr(Constants.TRUST_CA_STR)
+                .appValidateHttpsCa(true)
+                .connectionTimeout(Consts.DEFAULT_SOCKET_TIMEOUT)
+                .readConnectionTimeout(Consts.DEFAULT_SOCKET_TIMEOUT)
+                .filter(new LoginFilter())
+                //.filter(new MultipleResponseFilter().addFilter(new LoginFilter()))
+                .cookieController(new AppCookieController())
+                .enableDns(false)
+                //.dnsResolverController(new HttpDnsResolverController())
+                //.client(new OkHttpClient())
+                .client(new HttpUrlConnectionClient());
+        Global.init(builder);
+```
+详见com.xiaoniu.finance.myhttp.Global
+
+
+4. **请求API**
+```
+目前网络请求是POST和GET两个方式为主，可以根据自己需求特定调用
+调用方式：HttpManager.getInstance().doPost(request);
+```
+``` java
+    //DemoApi类
+    /**
+     * test数据
+     */
+    public static void requestTest(String type, String requestId, OnRequestListener l) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("type", type);
+        String requestUrl = BASE_URL + "xxxn.json";
+        Request request = RequestCreator.createRequest(l);
+        request.setHttpType(Consts.HTTP_TYPE_POST);
+        request.setUrl(requestUrl);
+        request.setUriParam(map);
+        request.setTaskGroupdID(requestId);
+        request.setCacheData(RequestCacheType.ClearAndUpdate);
+        request.setParser(new JsonParser(GeneralProjectResponse.getParseType()));
+        HttpManager.getInstance().doPost(request);
     }
-}
 ```
-详见com.xiaoniu.finance.annotation.router.Router注解类的说明
+注:数据解析通过IDataParser接口，具体可查看数据解析接口的实现
 
 
-4. 初始化路由
-```
-由于是模块分层,因此每个模块都有对应的代码分布,而每个模块都有一个初始化功能类,在这个类的初始化过程添加进去.
-其原理:通过扫描 dex 的方式进行加载通过 gradle 插件进行自动注册
-App(启动的时候加载初始化各个子模块的初始化功能的总管类InitProxyManager,管理调用子模块的初始化XxxxProxyManager)
-|____Fund基金模块(实现基金模块的初始化类FundProxyManager)
-|____Fixed定期模块(实现定期模块的初始化类FixedProxyManager)
-```
+5. **调用和数据处理操作**
+
+5.1  调用操作
+在需要使用的地方进行网络调用，目前通过eventbus解耦，关于eventbus用法请查看进阶用法
 ``` java
-@Inject
-class FundProxyManager{
-   void init(Context context){
-       //此类通过XNProcessor代码产生器自动产生此类代码(格式XxxRouterManager,其中Xxx就是gradle配置moduleName参数时)
-       FundRouterManager.setup();
-   }
-}
+ /**网络请求数据方法*/
+ private void requestData(final boolean isShowLoading) {
+         if (isRequesting) {
+             return;
+         }
+         if (isFinishing()) {
+             return;
+         }
+         if (isShowLoading) {
+             mLoadingDialogHelper.showLoadingDialog(this, false, "加载中。。。");
+         }
+         isRequesting = true;
+         //request api
+         DemoApi.requestTest("YXN", TAG, new OnInnerRequestListener(new AppMessageEvent.TestResponseEvent()));
+     }
 ```
-注:其中@Inject就是在代码编译时自动注入InitProxyManager的init(Context context) // 尽可能早，推荐在Application中初始化
 
-5. **发起路由操作**
-
-5.1  应用内简单的跳转(通过URL跳转在'进阶用法'中)
+5.2. 请求响应处理操作
 ``` java
- XnRouter.getInstance().from(context, new XnRouterRequest.Builder().build("/fund/result"));
-```
+     @Subscribe(threadMode = ThreadMode.MAIN)
+     public void processTest(AppMessageEvent.TestResponseEvent responseEvent) {
+         isRequesting = false;
+         mLoadingDialogHelper.dismissLoadingDialog();
+         Object result = responseEvent.result;
+         Request request = responseEvent.request;
+         int state = responseEvent.state;
 
-5.2. 跳转并携带参数
-``` java
- XnRouter.getInstance().from(context, new XnRouterRequest.Builder().build("/fund/result2")
-   .withInt("request", REQ_CODE)
-   .withLong("key1", 666L)
-   .withString("key3", "888"))
+         if (request.isCancelReqesut()) {
+             return;
+         }
+         String errorTip = getResponeErrorTip(state, result, true);
+         if (!TextUtils.isEmpty(errorTip)) {
+             Toast.makeText(this, errorTip, Toast.LENGTH_SHORT).show();
+             return;
+         }
+         BaseResponse response = (BaseResponse) result;
+         data = (GeneralProjectResponse) response.data;
+         if (data != null && data.list != null) {
+             tv.setText(data.list.get(0).name);
+
+         }
+     }
 ```
 
 5.3. 携带fragment对象
