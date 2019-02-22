@@ -370,6 +370,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 3.2.  缓存数据的存储功能
 
 缓存存储就是把响应数据进行存储在介质上，例如文件，数据库，sharepreference等
+
 默认已经实现了数据库缓存介质
 ``` java
     //启用缓存存储介质
@@ -484,15 +485,6 @@ public class JsonParser implements IDataParser {
 ``` java
     public class BaseResponse<T> implements Serializable {
 
-        private static final long serialVersionUID = 119940790462712533L;
-
-        public static Type getParseType() {
-            return new TypeToken<BaseResponse<?>>() {
-            }.getType();
-        }
-
-        public static final String TAG = "BaseResponse";
-
         public String code;
 
         public String message;
@@ -500,26 +492,13 @@ public class JsonParser implements IDataParser {
         public T data;
 
         public long serverTime;
-
-        public boolean isSuccess() {
-            return Constants.ResultCode.SUCCESS.equals(code);
-        }
-
-        @Override
-        public String toString() {
-            return "BaseResponse{" +
-                    "code='" + code + '\'' +
-                    ", message='" + message + '\'' +
-                    ", data=" + data + '\'' +
-                    ", serverTime=" + serverTime +
-                    '}';
-        }
     }
 ```
 6. **eventbus的进阶**
 
-为了防止内存泄露ui和listener，通过eventbus解耦实现，完美
-整体实现就是简单的封装，实现简单
+为了防止ui和listener间的内存泄露，可通过eventbus解耦实现之
+
+整体实现就是对eventbus进行简单的封装，具体实现和封装请参考demo项目
 ``` java
     public class BaseActivity extends AppCompatActivity {
 
@@ -581,7 +560,7 @@ public class JsonParser implements IDataParser {
                 return is;
             }
         })
-                .taskOn(Schedulers.immediate())
+                **.taskOn(Schedulers.immediate())**
                 .fliter(new Processor<InputStream, Boolean>() {
                     @Override
                     public Boolean process(InputStream inputStream) {
@@ -605,7 +584,8 @@ public class JsonParser implements IDataParser {
                 }
                 return sb.toString();
             }
-        }).taskOn(Schedulers.io()).callbackOn(Schedulers.main())
+        })
+        **.taskOn(Schedulers.io()).callbackOn(Schedulers.main())**
                 .callback(new Callback<String>() {
                     @Override
                     public void onCompleted() {
