@@ -559,15 +559,16 @@ public class JsonParser implements IDataParser {
                 }
                 return is;
             }
-        })
-                **.taskOn(Schedulers.immediate())**
-                .fliter(new Processor<InputStream, Boolean>() {
+    })
+    .taskOn(Schedulers.immediate())
+    .fliter(new Processor<InputStream, Boolean>() {
                     @Override
                     public Boolean process(InputStream inputStream) {
                         Log.e("w", Thread.currentThread().getName());
                         return inputStream != null;
                     }
-                }).map(new Processor<InputStream, String>() {
+                })
+    .map(new Processor<InputStream, String>() {
             @Override
             public String process(InputStream inputStream) {
                 Log.e("w", Thread.currentThread().getName());
@@ -585,8 +586,8 @@ public class JsonParser implements IDataParser {
                 return sb.toString();
             }
         })
-        **.taskOn(Schedulers.io()).callbackOn(Schedulers.main())**
-                .callback(new Callback<String>() {
+    .taskOn(Schedulers.io()).callbackOn(Schedulers.main())
+    .callback(new Callback<String>() {
                     @Override
                     public void onCompleted() {
 
@@ -602,7 +603,7 @@ public class JsonParser implements IDataParser {
                     public void onError(Throwable t) {
 
                     }
-                });
+    });
 ```
 
 7.2.  AsyncJob的实现
