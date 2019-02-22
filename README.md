@@ -787,19 +787,21 @@ public interface AbstractMonitor {
     }
 
     //注册此类的业务接口
-    RetryRequestMonitor.registRetryApi(XNTipConfigRequester.URL, new XNTipConfigRequester());
+    RetryRequestMonitor.registRetryApi(XNTipConfigRequester.URL, new ConfigRequester());
 ```
 #### 五、未来规划
 
-  1.新增下载功能
+  1.  **新增下载功能**
 
-  2.补全后续的Http协议的method
+  2.  **补全后续的Http协议的method**
 
-  3.根据热度新增操作符
+  3.  **根据热度新增响应式编程的操作符**
 
-  4.根据腾讯mars那套重试请求理论实现优化
+  4.  **根据腾讯mars那套重试请求理论实现优化**
 
-  5.新增通用业务性需求的接口和功能
+  5.  **新增通用业务性需求的接口和功能**
+
+  6.  等待有缘人
 
 #### 六、Q&A
 
