@@ -288,7 +288,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 
 2. **DNS功能**
 
-2. 1 开启DNS开关
+2.1.  开启DNS开关
 
 其中true表示已经开启DNS解析功能，false表示关闭
 ``` java
@@ -691,50 +691,93 @@ public class JsonParser implements IDataParser {
     }
 
 ```
+8. **特殊的业务请求的进阶**
+
+例如有些特殊的业务网络接口需要在网络一旦有的时候，任何网络请求后同时启动此类业务接口。
+目前这边也根据这种特殊的业务也实现了扩展，例如配置类的更新接口，软件的更新接口。你只需要简单的注册监听器即可完美实现；
+具体可以详细分析**RetryRequestMonitor**
+``` java
+/**
+ * 响应监听器，
+ * 实现当存在网络时则唤醒所有注册过此监听的网络请求
+ */
+public interface AbstractMonitor {
+
+    /**
+     *
+     * @param url
+     * @param state
+     * @param result
+     * @param type
+     * @param request
+     * @param response
+     */
+    void onMonitor(String url, int state, Object result, int type, Request request, Response response);
+
+
+}
+```
+使用：**RetryRequestMonitor进行注册即可**
+``` java
+    /**
+     * [注册重试请求器]
+     * 注册进来的请求器会在每一次其他接口请求成功后自动触发它
+     * 如果注册后没有注销，在其他接口成功请求后总是会触发它被执行，它无法判断你需要的重试接口是否被成功处理
+     * 是否需要重试或不重试，需要你自己的regist和unRegist来告诉它
+     */
+    public synchronized void registRetryApi(String key, IRetryRequester requester)
+
+```
+例子：
+``` java
+    //业务接口实现代码
+    private static class ConfigRequester implements IRetryRequester {
+
+        public static final String URL = CONFIG_URL;
+
+        @Override
+        public boolean doRequest() {
+            ConfigFileRequestListener listener = new ConfigFileRequestListener(URL);
+            listener.setListener(new ConfigFileRequestListener.ExtraRequestListener() {
+                @Override
+                public void call(String key) {
+                    LocalBroadcastManager.getInstance(BaseApplicationProxy.getApplicationContext())
+                            .sendBroadcast(new Intent(KeyConstants.AppBoardcast.INTENT_ACTION_REMOTE_CONFIG));
+                }
+            });
+            API.requestXnTipConfig(listener);
+            return true;
+        }
+    }
+
+    //注册此类的业务接口
+    RetryRequestMonitor.registRetryApi(XNTipConfigRequester.URL, new XNTipConfigRequester());
+```
 #### 五、未来规划
-  1.新增网络下载
-  ``` java
-      ThreadMode threadMode() default ThreadMode.POSTING
 
-      public enum ThreadMode {
-          /**
-           * 在调用post所在的线程执行回调
-           */
-          POSTING,
+  1.新增下载功能
 
-          /**
-           * 在UI线程回调
-           */
-          MAIN,
+  2.补全后续的Http协议的method
 
-          /**
-           * 在Backgroud线程回调
-           */
-          BACKGROUND,
+  3.根据热度新增操作符
 
-          /**
-           * 交给线程池来管理
-           */
-          ASYNC
-      }
-  ```
-  2.完善路由系统
+  4.根据腾讯mars那套重试请求理论实现优化
 
-  3.增加模块间接口的路由调用
+  5.新增通用业务性需求的接口和功能
 
 #### 六、Q&A
-  1. "如何自定义权限不足的操作"
+
+  1. "如何实现多个拦截器的操作"
 
      这个可以通过如下代码实现:
    ``` java
-        XnRouter.getInstance().setPermissionDeniedListener(
-        new XnRouter.PermissionDeniedListener() {
-               @Override
-                public void onPermissionDenied(Context context) {
-                       Dialog.builder(context).show();
-                }
-        })
+        .filter(new MultipleResponseFilter().addFilter(new LoginFilter()))
    ```
+
+   2. "如何转换响应数据到我自己特定的业务数据格式"
+
+      程序届，多加一层封装可以解决问题，如果再解决不了就继续加一层直到问题解决。
+
 #### 七、其他
 
   1. 沟通和交流
