@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 26
-
 
 
     defaultConfig {
@@ -25,4 +25,13 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+publish {
+    userOrg = 'wenzhonghu'
+    groupId = "${GROUP_ID}"
+    artifactId = "${MYHTTP_ARTIFACT_ID}"
+    publishVersion = "${MYHTTP_VERSION}"
+    desc = 'This is a myhttp library '
+    website = 'https://github.com/wenzhonghu/myhttp'
 }

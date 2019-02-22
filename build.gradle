@@ -8,7 +8,8 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0'
-        
+        classpath 'com.novoda:bintray-release:+'
+        //gradlew clean build bintrayUpload -PbintrayUser=wenzhonghu -PbintrayKey=964dee6404a9d51dae1ad6f2d42cea2c3ae81e35 -PdryRun=false
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -19,6 +20,15 @@ allprojects {
     repositories {
         google()
         jcenter()
+    }
+
+    tasks.withType(Javadoc) {
+        failOnError = false
+        options{
+            encoding "UTF-8"
+            charSet 'UTF-8'
+            links "http://docs.oracle.com/javase/7/docs/api"
+        }
     }
 }
 
