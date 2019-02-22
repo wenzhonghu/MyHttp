@@ -91,7 +91,8 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 
 5. **调用和数据处理操作**
 
-5.1  调用操作
+5.1  ***调用操作***
+
 在需要使用的地方进行网络调用，目前通过eventbus解耦，关于eventbus用法请查看进阶用法
 ``` java
  /**网络请求数据方法*/
@@ -137,6 +138,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 
 #### 四、进阶用法
 1. **网络库选型功能**
+
 随着业务的推进和公司的发展，底层网络通信交互肯定也有变化。例如初期选择了一套HttpClient，
 发现更优的第三库如okhttp，最后随着安全自己实现一套c++的网络通信协议。所以网络库选型的封装是必用的。
 所以提供高扩展性通信协议库的切换和更新接口
@@ -166,7 +168,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 ```
 目前只提供get和post，如果自己需要实现其他的method请download改造之;
 
-1.1 HttpUrlConnection库的扩展实现
+1.1.  HttpUrlConnection库的扩展实现
 ``` java
     public class HttpUrlConnectionClient implements AbstractClient{
         @Override
@@ -188,8 +190,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
     }
 ```
 
-
-1.2 okhttp库的扩展实现
+1.2.  okhttp库的扩展实现
 ``` java
 
     public class OkHttpClient implements AbstractClient {
@@ -263,7 +264,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 ```
 
 
-1.2 自己实现的c++库的扩展实现
+1.3.  自己实现的c++库的扩展实现
 ``` java
     public class MyClient implements AbstractClient{
         @Override
@@ -288,6 +289,7 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 2. **DNS功能**
 
 2. 1 开启DNS开关
+
 其中true表示已经开启DNS解析功能，false表示关闭
 ``` java
     builder.enableDns(true)
@@ -314,21 +316,28 @@ Builder builder = new Builder(this, Constants.BASE_URL)
      };
 ```
 
-2.2 满足市面第三方DNS解析的扩展
+2.2.  满足市面第三方DNS解析的扩展
+
+可以通过自定义方式，你只需要简单的实现**DnsResolverController**接口，
+可参考demo例子的**HttpDnsResolverController**
 ``` java
     //实现腾讯的httpdns+库
     builder.dnsResolverController(new HttpDnsResolverController())
 ```
-也可以通过自定义方式，你只需要简单的实现**DnsResolverController**接口，
-可参考demo例子的**HttpDnsResolverController**
+
 
 3. **响应数据的缓存**
+
 满足特定业务需求添加响应数据缓存。例如为了减少服务端访问一段时间使用上次缓存等
 
-3.1 提供缓存模式机制
+3.1.  提供缓存模式机制
+
 目前提供三种模式，满足大幅业务需求：
+
  1、不提供缓存（默认值）；
+
  2、提供全局缓存，缓存删除需要用户手动操作；
+
  3、提供访问后删除缓存模式；
 
 ``` java
@@ -354,7 +363,8 @@ Builder builder = new Builder(this, Constants.BASE_URL)
         ClearAndUpdate(2);
     }
 ```
-3.2 缓存数据的存储功能
+3.2.  缓存数据的存储功能
+
 缓存存储就是把响应数据进行存储在介质上，例如文件，数据库，sharepreference等
 默认已经实现了数据库缓存介质
 ``` java
@@ -366,12 +376,14 @@ Builder builder = new Builder(this, Constants.BASE_URL)
     com.xiaoniu.finance.myhttp.cache.DatabaseCacheController
 ```
 4. **Cookie的支持**
+
 我们在实现web业务功能可能需要给浏览器提供cookie机制，
 例如当app登陆后获取到tokenid/sessionid，此时让浏览器感知已经登陆，
 你可以通过把tokenid值存在cookie里面，浏览器后续可以把令牌值传递服务端实现web免登陆等功能。
 **本质上就是app层和web层共享一份cookie数据**
 
-4.1 cookie的同步和读取操作
+4.1.  cookie的同步和读取操作
+
 请详细查看**CookieHelper类**
 ``` java
     使用片段代码:
@@ -380,7 +392,8 @@ Builder builder = new Builder(this, Constants.BASE_URL)
     CookieHelper.getInstance().readCookie // 读取cookie数据
     CookieHelper.getInstance().removeCookie // 移除cookie数据
 ```
-4.2 cookie的本地缓存操作
+4.2.  cookie的本地缓存操作
+
 上面说过app层和web层共享一份cookie数据，但是其两种格式可以不一样，例如web层肯定是符合
 android的CookieManager类的实现的格式，而app层则可以保存json格式等文本数据，所以提供接口
 **com.xiaoniu.finance.myhttp.http.cookie.CookieController**进行缓存操作
@@ -415,6 +428,7 @@ android的CookieManager类的实现的格式，而app层则可以保存json格�
 
 
 5. **通信数据解析的支持**
+
 不同的业务不同的数据格式，需要统一解析实现封装则必须实现一套通信数据解析机制，
 其数据解析通过实现接口来完成统一解析功能
 ``` java
@@ -499,6 +513,7 @@ public class JsonParser implements IDataParser {
     }
 ```
 6. **eventbus的进阶**
+
 为了防止内存泄露ui和listener，通过eventbus解耦实现，完美
 整体实现就是简单的封装，实现简单
 ``` java
@@ -539,12 +554,14 @@ public class JsonParser implements IDataParser {
 ```
 
 7. **线程任务的进阶**
+
 项目很容易出现线程池满天飞，导致不规范不统一而且更容易出现问题，所以网络层最好统一对外提供并发服务；
 但是多线程模式对使用者不友好，根据前辈实践，rx响应式编程非常利于多线程编程，我这边根据rxjava模拟一套简化版rx
 为啥自己实现一套，因为本进阶仅仅就是为了让多线程并发使用方便简洁，没必要去学习复杂且陡度高的rxjava，
 实现了操作符：map，flatMap，filter，taskOn，callbackOn。
 其中taskOn和callbackOn就是线程间切换的操作符
-7.1 调用
+
+7.1.  调用
 ``` java
     AsyncJob.from(assetFile).map(new Processor<String, InputStream>() {
             @Override
@@ -604,7 +621,7 @@ public class JsonParser implements IDataParser {
                 });
 ```
 
-7.2 AsyncJob的实现
+7.2.  AsyncJob的实现
 ``` java
     public class AsyncJob<T> {
 
