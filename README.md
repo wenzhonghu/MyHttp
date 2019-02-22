@@ -93,7 +93,10 @@ Builder builder = new Builder(this, Constants.BASE_URL)
 
 5.1  ***调用操作***
 
-在需要使用的地方进行网络调用，目前通过eventbus解耦，关于eventbus用法请查看进阶用法
+在需要使用的地方进行网络调用，DemoApi.requestTest(xxx)即可完美访问网络数据；
+
+目前本人公司是通过eventbus架构方式访问网络，代码如下，关于eventbus用法请查看进阶用法
+
 ``` java
  /**网络请求数据方法*/
  private void requestData(final boolean isShowLoading) {
