@@ -3,6 +3,7 @@ package com.xiaoniu.myhttpdemo;
 import android.app.Application;
 import com.xiaoniu.finance.myhttp.Global;
 import com.xiaoniu.finance.myhttp.Global.Builder;
+import com.xiaoniu.finance.myhttp.cache.DatabaseCacheController;
 import com.xiaoniu.finance.myhttp.filter.MultipleResponseFilter;
 import com.xiaoniu.finance.myhttp.http.Consts;
 import com.xiaoniu.myhttpdemo.client.Constants;
@@ -31,6 +32,7 @@ public class MyApplication extends Application {
                 //.filter(new MultipleResponseFilter().addFilter(new LoginFilter()))
                 .cookieController(new AppCookieController())
                 .enableDns(false)
+                .cacheController(new DatabaseCacheController())
                 //.dnsResolverController(new HttpDnsResolverController())
                 //.client(new OkHttpClient())
                 .client(new HttpUrlConnectionClient());

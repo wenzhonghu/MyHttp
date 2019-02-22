@@ -202,7 +202,7 @@ public final class Global {
             this.connectionTimeout = DEFAULT_SOCKET_TIMEOUT;
             this.readConnectionTimeout = DEFAULT_SOCKET_TIMEOUT;
             this.appValidateHttpsCa = true;
-            this.iCacheController = new DatabaseCacheController(context);
+            this.iCacheController = new DatabaseCacheController();
             this.interceptor = new BaseInterceptor();
             this.filter = new BaseResponseFilter();
             this.dnsResolverController = DnsResolverController.DEFALUT;

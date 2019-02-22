@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import com.xiaoniu.finance.myhttp.Global;
 import com.xiaoniu.finance.myhttp.http.Consts.CacheConst;
 import com.xiaoniu.finance.myhttp.http.Consts.HttpRespCode;
 import com.xiaoniu.finance.myhttp.http.request.OnRequestListener;
@@ -26,13 +27,9 @@ public class DatabaseCacheController implements ICacheController {
 
     private static final String TAG = "DatabaseCacheController";
 
-
-    private Context mContext;
-
     private boolean isSupportCryption = true;
 
-    public DatabaseCacheController(Context context) {
-        mContext = context;
+    public DatabaseCacheController() {
     }
 
 
@@ -45,7 +42,7 @@ public class DatabaseCacheController implements ICacheController {
         String columnKey = MD5Util.getMD5String16Bit(entireUrl);
         Cursor cursor = null;
         try {
-            cursor = DatabaseHelper.getSQLiteDatabase(mContext, false)
+            cursor = DatabaseHelper.getSQLiteDatabase(Global.getContext(), false)
                     .query(CacheConst.TABLE_NAME, new String[]{CacheConst.COLUMN_VALUE},
                             CacheConst.COLUMN_KEY + "='" + columnKey + "'",
                             null, null, null, null);
@@ -62,7 +59,7 @@ public class DatabaseCacheController implements ICacheController {
     @Override
     public void getResponseFromCache(Request request) {
         try {
-            responseCache(mContext, request, request.getOnRequestListener());
+            responseCache(Global.getContext(), request, request.getOnRequestListener());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,7 +84,7 @@ public class DatabaseCacheController implements ICacheController {
         values.put(CacheConst.COLUMN_VALUE, resultStr);
         values.put(CacheConst.COLUMN_TYPE, cacheType);
         values.put(CacheConst.COLUMN_DATE, System.currentTimeMillis());
-        SQLiteDatabase db = DatabaseHelper.getSQLiteDatabase(mContext, false);
+        SQLiteDatabase db = DatabaseHelper.getSQLiteDatabase(Global.getContext(), false);
         int rowNum = db.update(CacheConst.TABLE_NAME, values, CacheConst.COLUMN_KEY + "='" + columnKey + "'", null);
         Log.d(TAG, "saveDateAsCache rowNum:" + rowNum);
         if (rowNum == 0) {
@@ -155,7 +152,7 @@ public class DatabaseCacheController implements ICacheController {
     private void deleteCache(SQLiteDatabase db, Request request) {
         String entireUrl = request.getRequestEntireUrl();
         String columnKey = MD5Util.getMD5String16Bit(entireUrl);
-        Cursor cursor = DatabaseHelper.getSQLiteDatabase(mContext, false)
+        Cursor cursor = DatabaseHelper.getSQLiteDatabase(Global.getContext(), false)
                 .query(CacheConst.TABLE_NAME, new String[]{CacheConst.COLUMN_ID}, CacheConst.COLUMN_KEY + "='" + columnKey + "'", null, null, null, null);
         if (cursor.moveToFirst()) {
             int id = cursor.getInt(0);
@@ -171,7 +168,7 @@ public class DatabaseCacheController implements ICacheController {
     public void clearCache(Request request) {
         Log.d(TAG, "clearOldCache 删除旧的缓存");
         try {
-            SQLiteDatabase db = DatabaseHelper.getSQLiteDatabase(mContext, false);
+            SQLiteDatabase db = DatabaseHelper.getSQLiteDatabase(Global.getContext(), false);
             deleteCache(db, request);
             DatabaseHelper.releaseDb();
         } catch (Exception e) {
@@ -185,7 +182,7 @@ public class DatabaseCacheController implements ICacheController {
      */
     @Override
     public void clearAllCache() {
-        DatabaseHelper.getSQLiteDatabase(mContext, false).delete(CacheConst.TABLE_NAME, null, null);
+        DatabaseHelper.getSQLiteDatabase(Global.getContext(), false).delete(CacheConst.TABLE_NAME, null, null);
         DatabaseHelper.releaseDb();
     }
 
